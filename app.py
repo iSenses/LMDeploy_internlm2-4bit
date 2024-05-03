@@ -1,11 +1,9 @@
 import os
-import sys
+import warnings
 from lmdeploy.serve.gradio.turbomind_coupled import run_local
 from lmdeploy import pipeline, TurbomindEngineConfig, ChatTemplateConfig
 
-if not sys.warnoptions:
-    import warnings
-    warnings.simplefilter("ignore")
+warnings.simplefilter("ignore")
 
 backend_config = TurbomindEngineConfig(cache_max_entry_count=0.2)
 chat_template_config = ChatTemplateConfig(model_name='internlm2-chat-1_8b')
