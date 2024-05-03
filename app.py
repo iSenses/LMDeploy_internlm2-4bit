@@ -1,21 +1,12 @@
-import gradio as gr
 import os
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer, AutoModel
+from lmdeploy.serve.gradio.turbomind_coupled import run_local
+from lmdeploy import pipeline, TurbomindEngineConfig, ChatTemplateConfig
+
+backend_config = TurbomindEngineConfig(session_len=2048, cache_max_entry_count=0.2)
+chat_template_config = ChatTemplateConfig(model_name='internlm2-chat-1_8b')
 
 base_path = './4bit-1_8b'
 os.system(f'git clone https://code.openxlab.org.cn/mingyanglee/internlm2-chat-1_8b-4bit.git {base_path}')
 
-tokenizer = AutoTokenizer.from_pretrained(base_path,trust_remote_code=True)
-model = AutoModelForCausalLM.from_pretrained(base_path,trust_remote_code=True, torch_dtype=torch.float16).cuda()
 
-def chat(message,history):
-    for response,history in model.stream_chat(tokenizer,message,history,max_length=2048,top_p=0.8,temperature=1):
-        yield response
-
-gr.ChatInterface(chat,
-                 title="LMDeploy 1.8B 4bit量化， 来试试呀",
-                description="""
-4bit quantization on InternLM2 1.8B mainly developed by Shanghai AI Laboratory.  
-                 """,
-                 ).queue(1).launch()
+run_local(base_path, model_name='internlm2-chat-1_8b', backend_config=backend_config, chat_template_config=chat_template_config, server_port=7860)
